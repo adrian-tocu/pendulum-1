@@ -117,26 +117,26 @@ public abstract class BasePendulumConfig implements PendulumConfig {
     protected String saveLogBasePath = Defaults.SAVELOG_BASE_PATH;
     protected String saveLogXMLFile = Defaults.SAVELOG_XML_FILE;
 
-    //Curator
-    protected boolean curatorEnabled = Defaults.CURATOR_ENABLED;
-    protected Hash curatorAddress = Defaults.CURATOR_ADDRESS;
-    protected int updateNomineeDelay = Defaults.UPDATE_NOMINEE_DELAY;
+    //Validator Manager
+    protected boolean validatorManagerEnabled = Defaults.VALIDATOR_MANAGER_ENABLED;
+    protected Hash validatorManagerAddress = Defaults.VALIDATOR_MANAGER_ADDRESS;
+    protected int updateValidatorDelay = Defaults.UPDATE_VALIDATOR_DELAY;
     protected int startRoundDelay = Defaults.START_ROUND_DELAY;
-    protected String curatorKeyfile = Defaults.CURATOR_KEYFILE;
-    protected int curatorKeyDepth = Defaults.CURATOR_KEY_DEPTH;
-    protected int curatorSecurity = Defaults.CURATOR_SECURITY;
+    protected String validatorManagerKeyfile = Defaults.VALIDATOR_MANAGER_KEYFILE;
+    protected int validatorManagerKeyDepth = Defaults.VALIDATOR_MANAGER_KEY_DEPTH;
+    protected int validatorManagerSecurity = Defaults.VALIDATOR_MANAGER_SECURITY;
 
     //Milestone
-    protected String nominee = Defaults.NOMINEE;
-    protected Set<Hash> initialNominees = Defaults.INITIAL_NOMINEES;
+    protected String validator = Defaults.VALIDATOR;
+    protected Set<Hash> initialValidators = Defaults.INITIAL_VALIDATORS;
     protected long genesisTime = Defaults.GENESIS_TIME;
     protected int roundDuration = Defaults.ROUND_DURATION;
     protected int roundPause = Defaults.ROUND_PAUSE;
-    protected String nomineeKeyfile = Defaults.NOMINEE_KEYFILE;
+    protected String validatorKeyfile = Defaults.VALIDATOR_KEYFILE;
     protected String resourcePath = Defaults.RESOUCER_PATH;
     protected String defaultResoucePath = Defaults.DEFAULT_RESOUCE_PATH;
     protected int milestoneKeyDepth = Defaults.MILESTONE_KEY_DEPTH;
-    protected int nomineeSecurity = Defaults.NOMINEE_SECURITY;
+    protected int validatorSecurity = Defaults.VALIDATOR_SECURITY;
 
     //Spammer
     protected int spamDelay = Defaults.SPAM_DELAY;
@@ -786,49 +786,48 @@ public abstract class BasePendulumConfig implements PendulumConfig {
         this.maxAnalyzedTransactions = maxAnalyzedTransactions;
     }
 
-    // Curator
-    @Override
-    public boolean getCuratorEnabled() {return curatorEnabled; }
+    // Validator Manager
+    public boolean getValidatorManagerEnabled() {return validatorManagerEnabled; }
     @JsonProperty
-    @Parameter(names = {"--curator"}, description = CuratorConfig.Descriptions.CURATOR_ENABLED, arity = 1)
-    protected void setCuratorEnabled(boolean curatorEnabled) { this.curatorEnabled = curatorEnabled; }
+    @Parameter(names = {"--validator-manager"}, description = ValidatorManagerConfig.Descriptions.VALIDATOR_MANAGER_ENABLED, arity = 1)
+    protected void setValidatorManagerEnabled(boolean validatorManagerEnabled) { this.validatorManagerEnabled = validatorManagerEnabled; }
 
     @Override
-    public Hash getCuratorAddress() { return curatorAddress; }
+    public Hash getValidatorManagerAddress() { return validatorManagerAddress; }
 
     @Override
-    public boolean isDontValidateTestnetCuratorSig() { return false; }
+    public boolean isDontValidateTestnetValidatorManagerSig() { return false; }
 
     @Override
-    public int getUpdateNomineeDelay() {return updateNomineeDelay; }
+    public int getUpdateValidatorDelay() {return updateValidatorDelay; }
     @JsonProperty
-    @Parameter(names = {"--update-nominee"}, description = CuratorConfig.Descriptions.UPDATE_NOMINEE_DELAY)
-    protected void setUpdateNomineeDelay(int updateNomineeDelay) { this.updateNomineeDelay = updateNomineeDelay; }
+    @Parameter(names = {"--update-validator"}, description = ValidatorManagerConfig.Descriptions.UPDATE_VALIDATOR_DELAY)
+    protected void setUpdateValidatorDelay(int updateValidatorDelay) { this.updateValidatorDelay = updateValidatorDelay; }
 
     @Override
     public int getStartRoundDelay() {return startRoundDelay; }
     @JsonProperty
-    @Parameter(names = {"--start-nominee"}, description = CuratorConfig.Descriptions.START_ROUND_DELAY)
+    @Parameter(names = {"--start-validator"}, description = ValidatorManagerConfig.Descriptions.START_ROUND_DELAY)
     protected void setStartRoundDelay(int startRoundDelay) { this.startRoundDelay = startRoundDelay; }
 
     @Override
-    public String getCuratorKeyfile() {return getResourcePath() + curatorKeyfile; }
+    public String getValidatorManagerKeyfile() {return getResourcePath() + validatorManagerKeyfile; }
 
     @Override
-    public int getCuratorKeyDepth() {return curatorKeyDepth; }
+    public int getValidatorManagerKeyDepth() {return validatorManagerKeyDepth; }
 
     @Override
-    public int getCuratorSecurity() {return curatorSecurity; }
+    public int getValidatorManagerSecurity() {return validatorManagerSecurity; }
 
     // Milestone
     @Override
-    public String getNominee() {return nominee; }
+    public String getValidator() {return validator; }
     @JsonProperty
-    @Parameter(names = {"--nominee"}, description = MilestoneConfig.Descriptions.NOMINEE)
-    protected void setNominee(String nominee) { this.nominee = nominee; }
+    @Parameter(names = {"--validator"}, description = MilestoneConfig.Descriptions.VALIDATOR)
+    protected void setValidator(String validator) { this.validator = validator; }
 
     @Override
-    public Set<Hash> getInitialNominees() {return initialNominees; }
+    public Set<Hash> getInitialValidators() {return initialValidators; }
 
     @Override
     public boolean isDontValidateTestnetMilestoneSig() {
@@ -860,7 +859,7 @@ public abstract class BasePendulumConfig implements PendulumConfig {
     protected void setRoundPause(int roundPause) { this.roundPause = roundPause; }
 
     @Override
-    public String getNomineeKeyfile() {return getResourcePath() + nomineeKeyfile; }
+    public String getValidatorKeyfile() {return getResourcePath() + validatorKeyfile; }
 
     @Override
     public String getResourcePath() {
@@ -870,7 +869,7 @@ public abstract class BasePendulumConfig implements PendulumConfig {
     public int getMilestoneKeyDepth() {return milestoneKeyDepth; }
 
     @Override
-    public int getNomineeSecurity() {return nomineeSecurity; }
+    public int getValidatorSecurity() {return validatorSecurity; }
 
 
     // POW
@@ -939,6 +938,4 @@ public abstract class BasePendulumConfig implements PendulumConfig {
     protected void setSpamDelay(int spamDelay) {
         this.spamDelay = spamDelay;
     }
-
-
 }
