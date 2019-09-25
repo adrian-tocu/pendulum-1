@@ -283,6 +283,39 @@ public class Node {
         boolean cached = false;
         double pDropTransaction = configuration.getpDropTransaction();
 
+        addressMatch = processNeighbourTransactions(receivedData, senderAddress, receivedTransactionHash, addressMatch, cached, pDropTransaction);
+
+        if (!addressMatch && configuration.isTestnet()) {
+            int maxPeersAllowed = configuration.getMaxPeers();
+            String uriString = uriScheme + ":/" + senderAddress.toString();
+            if (Neighbor.getNumPeers() < maxPeersAllowed) {
+                log.info("Adding non-tethered neighbor: " + uriString);
+                tangle.publish("antn %s", uriString);
+                try {
+                    final URI uri = new URI(uriString);
+                    // 3rd parameter false (not tcp), 4th parameter true (configured tethering)
+                    final Neighbor newneighbor = newNeighbor(uri, false);
+                    if (!getNeighbors().contains(newneighbor)) {
+                        getNeighbors().add(newneighbor);
+                        Neighbor.incNumPeers();
+                    }
+                } catch (URISyntaxException e) {
+                    log.error("Invalid URI string: " + uriString);
+                }
+            } else {
+                if (rejectedAddresses.size() > 20) {
+                    // Avoid ever growing list in case of an attack.
+                    rejectedAddresses.clear();
+                } else if (rejectedAddresses.add(uriString)) {
+                    tangle.publish("rntn %s %s", uriString, String.valueOf(maxPeersAllowed));
+                    log.info("Refused non-tethered neighbor: " + uriString +
+                            " (max-peers = " + maxPeersAllowed + ")");
+                }
+            }
+        }
+    }
+
+    private boolean processNeighbourTransactions(byte[] receivedData, SocketAddress senderAddress, Hash receivedTransactionHash, boolean addressMatch, boolean cached, double pDropTransaction) {
         for (final Neighbor neighbor : getNeighbors()) {
             addressMatch = neighbor.matches(senderAddress);
             if (addressMatch) {
@@ -348,54 +381,30 @@ public class Node {
 
                 //recentSeenBytes statistics
 
-                if (log.isDebugEnabled()) {
-                    long hitCount;
-                    long missCount;
-                    if (cached) {
-                        hitCount = recentSeenBytesHitCount.incrementAndGet();
-                        missCount = recentSeenBytesMissCount.get();
-                    } else {
-                        hitCount = recentSeenBytesHitCount.get();
-                        missCount = recentSeenBytesMissCount.incrementAndGet();
-                    }
-                    if (((hitCount + missCount) % 50000L == 0)) {
-                        log.info("RecentSeenBytes cache hit/miss ratio: " + hitCount + "/" + missCount);
-                        tangle.publish("hmr %d/%d", hitCount, missCount);
-                        recentSeenBytesMissCount.set(0L);
-                        recentSeenBytesHitCount.set(0L);
-                    }
-                }
+                logDebugInformation(cached);
 
                 break;
             }
         }
+        return addressMatch;
+    }
 
-        if (!addressMatch && configuration.isTestnet()) {
-            int maxPeersAllowed = configuration.getMaxPeers();
-            String uriString = uriScheme + ":/" + senderAddress.toString();
-            if (Neighbor.getNumPeers() < maxPeersAllowed) {
-                log.info("Adding non-tethered neighbor: " + uriString);
-                tangle.publish("antn %s", uriString);
-                try {
-                    final URI uri = new URI(uriString);
-                    // 3rd parameter false (not tcp), 4th parameter true (configured tethering)
-                    final Neighbor newneighbor = newNeighbor(uri, false);
-                    if (!getNeighbors().contains(newneighbor)) {
-                        getNeighbors().add(newneighbor);
-                        Neighbor.incNumPeers();
-                    }
-                } catch (URISyntaxException e) {
-                    log.error("Invalid URI string: " + uriString);
-                }
+    private void logDebugInformation(boolean cached) {
+        if (log.isDebugEnabled()) {
+            long hitCount;
+            long missCount;
+            if (cached) {
+                hitCount = recentSeenBytesHitCount.incrementAndGet();
+                missCount = recentSeenBytesMissCount.get();
             } else {
-                if (rejectedAddresses.size() > 20) {
-                    // Avoid ever growing list in case of an attack.
-                    rejectedAddresses.clear();
-                } else if (rejectedAddresses.add(uriString)) {
-                    tangle.publish("rntn %s %s", uriString, String.valueOf(maxPeersAllowed));
-                    log.info("Refused non-tethered neighbor: " + uriString +
-                            " (max-peers = " + maxPeersAllowed + ")");
-                }
+                hitCount = recentSeenBytesHitCount.get();
+                missCount = recentSeenBytesMissCount.incrementAndGet();
+            }
+            if (((hitCount + missCount) % 50000L == 0)) {
+                log.info("RecentSeenBytes cache hit/miss ratio: " + hitCount + "/" + missCount);
+                tangle.publish("hmr %d/%d", hitCount, missCount);
+                recentSeenBytesMissCount.set(0L);
+                recentSeenBytesHitCount.set(0L);
             }
         }
     }
